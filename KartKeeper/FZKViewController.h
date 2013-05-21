@@ -12,4 +12,7 @@
 
 @property (nonatomic, strong) NSArray *tracks;
 
+@property (nonatomic, strong) NSMutableArray *favorites;
+@property (nonatomic, strong) NSMutableArray *rejects;
+
 @end

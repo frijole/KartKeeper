@@ -15,8 +15,14 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
+    
+	// create a navigation controller around our custom table view class
 	self.viewController = [[UINavigationController alloc] initWithRootViewController:[[FZKViewController alloc] initWithStyle:UITableViewStyleGrouped]];
+
+	// show the toolbar at the bottom
+	[self.viewController setToolbarHidden:NO];
+	
+	// and proceed...
 	self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     return YES;

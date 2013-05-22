@@ -32,15 +32,13 @@
 
 	// toolbar
 	UISegmentedControl *tmpFavoritesFilter = [[UISegmentedControl alloc] initWithItems:@[@"All Tracks", @"Favorites", @"Rejects"]];
-	[tmpFavoritesFilter setSegmentedControlStyle:UISegmentedControlStyleBar];
-	[tmpFavoritesFilter setSelectedSegmentIndex:0];
+	[tmpFavoritesFilter addTarget:self action:@selector(filterSelectionChanged:) forControlEvents:UIControlEventValueChanged];
+    [tmpFavoritesFilter setSegmentedControlStyle:UISegmentedControlStyleBar];
+	[tmpFavoritesFilter setSelectedSegmentIndex:FZKViewControllerFilterSelectionIndexAll];
 	CGRect tmpFavoritesFrame = tmpFavoritesFilter.frame;
 	tmpFavoritesFrame.size.width = 250;
 	[tmpFavoritesFilter setFrame:tmpFavoritesFrame];
-
-#warning filters not hooked up yet, button disabled
-	[tmpFavoritesFilter setUserInteractionEnabled:NO];
-
+    [self setFilterControl:tmpFavoritesFilter];
 	
 	// UIBarButtonItem *tmpLeftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:nil action:nil];
 	UIBarButtonItem *tmpLeftSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
@@ -72,6 +70,11 @@
 }
 
 #pragma mark - Utilities
+- (void)filterSelectionChanged:(UISegmentedControl *)sender
+{
+    [self.tableView reloadData];
+}
+
 - (void)saveTracks
 {
 	// save!
@@ -152,6 +155,31 @@
 	}
 	
 	return rtnCell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 36.0f;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    CGFloat rtnHeight = 44.0f; // default
+     
+    if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexAll )
+        return rtnHeight;
+    
+    // filtering... ugly but works.
+    NSDictionary *tmpCupDict = [self.tracks objectAtIndex:indexPath.section];
+	NSArray *tmpTracks = [tmpCupDict objectForKey:[[tmpCupDict allKeys] lastObject]];
+	NSString *tmpTrack = [tmpTracks objectAtIndex:indexPath.row];
+
+    if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexFavorites && [self.favorites indexOfObject:tmpTrack] == NSNotFound )
+        rtnHeight = 0.0f;
+    else if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexRejects && [self.rejects indexOfObject:tmpTrack] == NSNotFound )
+        rtnHeight = 0.0f;
+    
+    return rtnHeight;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

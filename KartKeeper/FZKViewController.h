@@ -8,11 +8,21 @@
 
 #import <UIKit/UIKit.h>
 
+typedef NS_ENUM(NSInteger, FZKViewControllerFilterSelectionIndex) {
+    FZKViewControllerFilterSelectionIndexAll,
+    FZKViewControllerFilterSelectionIndexFavorites,
+    FZKViewControllerFilterSelectionIndexRejects
+};
+
 @interface FZKViewController : UITableViewController
+
+@property (nonatomic, weak) UISegmentedControl *filterControl;
 
 @property (nonatomic, strong) NSArray *tracks;
 
 @property (nonatomic, strong) NSMutableArray *favorites;
 @property (nonatomic, strong) NSMutableArray *rejects;
+
+
 
 @end

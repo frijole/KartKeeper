@@ -17,7 +17,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
 	// create a navigation controller around our custom table view class
-	self.viewController = [[UINavigationController alloc] initWithRootViewController:[[FZKViewController alloc] initWithStyle:UITableViewStyleGrouped]];
+	self.viewController = [[UINavigationController alloc] initWithRootViewController:[[FZKViewController alloc] initWithStyle:UITableViewStylePlain]];
 
 	// show the toolbar at the bottom
 	[self.viewController setToolbarHidden:NO];

@@ -14,11 +14,12 @@ typedef NS_ENUM(NSInteger, FZKViewControllerFilterSelectionIndex) {
     FZKViewControllerFilterSelectionIndexRejects
 };
 
-@interface FZKViewController : UITableViewController
+@interface FZKViewController : UITableViewController <UIScrollViewDelegate, UISearchBarDelegate, UISearchDisplayDelegate>
 
 @property (nonatomic, weak) UISegmentedControl *filterControl;
 
-@property (nonatomic, strong) NSArray *tracks;
+@property (nonatomic, strong) NSArray *dataSource;
+@property (nonatomic, strong) NSPredicate *filterPredicate;
 
 @property (nonatomic, strong) NSMutableArray *favorites;
 @property (nonatomic, strong) NSMutableArray *rejects;

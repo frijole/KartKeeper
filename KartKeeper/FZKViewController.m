@@ -8,12 +8,18 @@
 
 #import "FZKViewController.h"
 
-#import "NSFileManager+CommonDirectories.h"
-
-#define favoritesFile [[NSFileManager documentDirectoryPath] stringByAppendingPathComponent:@"favorites"]
-#define rejectsFile [[NSFileManager documentDirectoryPath] stringByAppendingPathComponent:@"rejects"]
+#import "FZKDataStore.h"
+#import "FZKCup.h"
 
 @interface FZKViewController ()
+{
+    UISearchBar *searchBar;
+    UISearchDisplayController *searchDisplayController;
+    
+    CGPoint *_scrollUndoPosition;
+}
+
+@property (nonatomic, strong) NSArray *tracks;
 
 @end
 
@@ -23,7 +29,8 @@
 {
 	self = [super initWithStyle:style];
 	
-	self.title = @"CTGP Track List";
+	self.title = @"KartKeeper CTGP";
+    
 	
 //	UISegmentedControl *tmpTrackListFilter = [[UISegmentedControl alloc] initWithItems:@[@"Standard", @"Wacky"]];
 //	[tmpTrackListFilter setSegmentedControlStyle:UISegmentedControlStyleBar];
@@ -48,39 +55,101 @@
 
 	[self setToolbarItems:@[tmpLeftSpace, tmpFavoritesControl, tmpRightSpace]];
 	
-	self.tracks = @[@{@"Mushroom Cup":@[@"Luigi Circuit", @"Moo Moo Meadows", @"Mushroom Gorge", @"Toad's Factory"]}, @{@"Flower Cup":@[@"Mario Circuit", @"Coconut Mall", @"DK's Snowboard Cross", @"Wario's Gold Mine"]}, @{@"Star Cup":@[@"Daisy Circuit", @"Koopa Cape", @"Maple Treeway", @"Grumble Volcano"]}, @{@"Special Cup":@[@"Dry Dry Ruins", @"Moonview Highway", @"Bowser's Castle", @"Rainbow Road"]}, @{@"Shell Cup":@[@"GCN Peach Beach", @"DS Yoshi Falls", @"SNES Ghost Valley 2", @"N64 Mario Raceway"]}, @{@"Banana Cup":@[@"N64 Sherbet Land", @"GBA Shy Guy Beach", @"DS Delfino Square", @"GCN Waluigi Stadium"]}, @{@"Leaf Cup":@[@"DS Desert Hills", @"GBA Bowser Castle 3", @"N64 DK's Jungle Parkway", @"GCN Mario Circuit"]}, @{@"Lightning Cup":@[@"SNES Mario Circuit 3", @"DS Peach Gardens", @"GCN DK Mountain", @"N64 Bowser's Castle"]}, @{@"Blooper Cup":@[@"GBA Lakeside Park", @"GBA Cheep Cheep Island", @"ASDF_Course", @"Space Road"]}, @{@"Mega Mushroom Cup":@[@"Sunset Forest", @"Sunset Desert", @"Kartwood Creek", @"Haunted Woods"]}, @{@"Thundercloud Cup":@[@"GBA Riverside Park", @"SNES Choco Island 2", @"Jungle Safari", @"Beagle Plains"]}, @{@"POW Cup":@[@"DS Figure-8 Circuit", @"N64 Yoshi Valley", @"DS Waluigi Pinball", @"GCN Daisy Cruiser"]}, @{@"Bob-Omb Cup":@[@"GBA Bowser Castle 4", @"Illusion Canyon", @"DS Wario Stadium", @"Wario's Lair"]}, @{@"Fake Item Cup":@[@"SNES Mario Circuit 1", @"Green Hill Zone", @"Sunset Circuit", @"DS Cheep Cheep Beach"]}, @{@"Golden Mushroom Cup":@[@"GCN Yoshi Circuit", @"Goldwood Forest", @"N64 Royal Raceway", @"Putt Putt Raceway"]}, @{@"Spring Cup":@[@"DS Airship Fortress", @"Bowser Jr.'s Fort", @"N64 Choco Mountain", @"Star Slope"]}, @{@"Fireball Cup":@[@"Thwomp Cave", @"SNES Bowser Castle 2", @"GCN Bowser Castle", @"Incendia Castle"]}, @{@"Red Shell Cup":@[@"Lavaflow Volcano", @"Unnamed Valley", @"Pipe Underworld", @"Beach Gardens"]}, @{@"Blue Shell Cup":@[@"Thunder City", @"Lunar Speedway", @"N64 Banshee Boardwalk", @"Fishdom Island"]}, @{@"Bullet Bill Cup":@[@"SM64 Whomp's Fortress", @"Punch City", @"Delfino Island", @"Six King Labyrinth"]}, @{@"Chain Chomp Cup":@[@"GCN Luigi Circuit", @"Chomp Canyon", @"Chomp Valley", @"Daisy's Palace"]}, @{@"Mii Outfit C Cup":@[@"Codename: BIGBOX", @"Luigi's Island", @"GBA Cheep Cheep Island", @"Rezway"]}, @{@"Poison Mushroom Cup":@[@"Desert Mushroom Ruins", @"Yoshi Lagoon", @"GCN Wario Colosseum", @"Mushroom Peaks"]}, @{@"Ice Flower Cup":@[@"Penguin Canyon", @"Northpole Slide", @"Icy Mountains", @"GCN Sherbet Land"]}, @{@"Propellor Cup":@[@"GBA Sky Garden", @"Cloud Carpet", @"Volcanic Skyway (RC1)", @"Volcanic Skyway (RC3)"]}, @{@"Hammer Bro Cup":@[@"Thwomp Desert", @"Desert Bone", @"Stronghold Castle", @"Bowser's Fortress"]}, @{@"Wiggler Cup":@[@"GBA Ribbon Road", @"DS Luigi's Mansion", @"DK Jungle Tour", @"Rocky Cliff"]}, @{@"Penguin Suit Cup":@[@"DS Nokonoko Beach", @"DS Mario Circuit", @"Faraway Land", @"Icy Vulcan Valley"]}, @{@"Bee Mushroom Cup":@[@"GBA Sky Garden", @"Sky Courtyard", @"Icy Mountaintop", @"GBA Cheese Land"]}, @{@"Rock Mushroom Cup":@[@"Dry Coast", @"SNES Bowser Castle 3", @"Underground Sky", @"Misty Ruins"]}, @{@"1UP Cup":@[@"Snowy Circuit", @"Water Island", @"Calidae Desert", @"N64 Kalimari Desert"]}, @{@"Feather Cup":@[@"SNES Rainbow Road", @"Kinoko Cave", @"GCN Baby Park", @"Rainbow Dash Road"]}, @{@"Shine Sprite Cup":@[@"GBA Bowser Castle 1", @"Thwomp Factory", @"Green Grassroad", @"Mikoopa's Citadel"]}, @{@"Yoshi Egg Cup":@[@"GBA Mario Circuit", @"Rezway 2", @"Sunset Ridge", @"N64 Moo Moo Farm"]}, @{@"Stone Tanooki Cup":@[@"Stone Route", @"Snowy Circuit 2", @"Helado Mountain", @"Christmas Dream"]}, @{@"Birdo Egg Cup":@[@"Tree Circuit", @"N64 Koopa Troopa Beach", @"Sandcastle Park", @"Mushroom Valley"]}, @{@"Bowser Shell Cup":@[@"Punch City (RC2)", @"GCN Mushroom City", @"Coastal Island", @"Factory Course"]}, @{@"Metal Mushroom Cup":@[@"F-Zero Big Blue", @"F-Zero White Land 1", @"Sparkly Road", @"N64 Frappe Snowland"]}, @{@"Luigi Fireball Cup":@[@"GBA Luigi Circuit", @"Rooster Island", @"Petite Park", @"N64 Rainbow Road - Lunar Edition"]}, @{@"Pencil Cup":@[@"Red Loop", @"Green Loop", @"Blue Loop", @"Yellow Loop"]}, @{@"Grand Star Cup":@[@"Lunar Spaceway", @"Seaside Resort", @"GCN Mushroom Bridge", @"Sacred Fogcoast"]}, @{@"Boo Cup":@[@"GBA Boo Lake", @"Forsaken Mansion", @"Darkness Temple", @"Temple Bay"]}, @{@"Spin Drill Cup":@[@"Rock Rock Ridge", @"Alpine Mountain", @"SM64 Bob-Omb Battlefield", @"Volcano Beach 2"]}, @{@"Star Bits Cup":@[@"SADX Twinkle Circuit", @"Galaxy Base", @"Rosalina's Snow World", @"Digitally Enhanced"]}, @{@"Fire Cup":@[@"SNES Bowser Castle 1", @"SNES Bowser Castle 2 (v2)", @"SNES Bowser Castle 3 (v2)", @"Lava Road"]}, @{@"Cheep-Cheep Cup":@[@"SNES Koopa Beach 1", @"Sky Beach", @"Love Beach", @"Piranha Plant Pipeline"]}, @{@"Ice Bro Cup":@[@"Iceway", @"Alpine Circuit", @"DS DK Pass", @"GBA Snow Land"]}, @{@"Golden Flower Cup":@[@"Green Park", @"Jungle Island", @"Strobenz Desert", @"White Garden"]}, @{@"Question Block Cup":@[@"Retro Raceway", @"N64 Luigi Raceway", @"Abe Abbott Raceway", @"SNES Choco Island 1"]}, @{@"Cloud Flower Cup":@[@"Seasonal Circuit", @"Sunshine Yard", @"Lakeside Hill", @"Bouncy Farm"]}, @{@"Brick Block Cup":@[@"Cliff Village", @"Coral Cape", @"Delfino Circuit", @"Crystal Dungeon"]}, @{@"Blue Coin Cup":@[@"Aquadrom Stage", @"Athletic Raceway", @"Kirio Raceway", @"Penguin Cave"]}, @{@"Green Star Cup":@[@"Magma Island", @"DKR Ancient Lake", @"N64 Toad's Turnpike", @"N64 Wario Stadium"]}, @{@"Rainbow Cup":@[@"SNES Rainbow Road", @"GBA Rainbow Road", @"GCN Rainbow Road", @"SNES Rainbow Road"]}];
+    // set the data source for the table!
+    self.dataSource = [FZKDataStore cups];
+    
+    // and set up a search bar and filter
+    searchBar = [[UISearchBar alloc] initWithFrame:CGRectZero];
+    [searchBar sizeToFit];
+    [searchBar setDelegate:self];
+    [searchBar setPlaceholder:@"Search"];;
+    // [searchBar setScopeButtonTitles:@[@"All",@"Favorites", @"Rejects"]]; // to add tabs to modal search presentation. overkill for now.
+    [self.tableView setTableHeaderView:searchBar];
+    
+    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+    
+    searchDisplayController = [[UISearchDisplayController alloc] initWithSearchBar:searchBar contentsController:self];
+    [searchDisplayController setDelegate:self];
+    [searchDisplayController setSearchResultsDataSource:self];
+    [searchDisplayController setSearchResultsDelegate:self];
 	
-	self.rejects = [NSMutableArray array];
-	
-	// try to load saved ones
-	NSMutableArray *tmpFavoritesFromDisk = [NSKeyedUnarchiver unarchiveObjectWithFile:favoritesFile];
-	if ( tmpFavoritesFromDisk )
-		[self setFavorites:tmpFavoritesFromDisk];
-	else
-		[self setFavorites:[NSMutableArray array]];
-	
-	NSMutableArray *tmpRejectsFromDisk = [NSKeyedUnarchiver unarchiveObjectWithFile:rejectsFile];
-	if ( tmpRejectsFromDisk )
-		[self setRejects:tmpRejectsFromDisk];
-	else
-		[self setRejects:[NSMutableArray array]];
-	
-	
+    
 	return self;
+}
+
+- (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView
+{
+    // we don't want to scroll to the *top*, becuase that'll expose the serach bar.
+    // so we're going to go to the first row ourselves
+    [self.tableView setContentOffset:CGPointMake(0, 44) animated:YES];
+
+    // so we don't need to do the usual
+    return NO;
 }
 
 #pragma mark - Utilities
 - (void)filterSelectionChanged:(UISegmentedControl *)sender
-{
-    [self.tableView reloadData];
+{   // set a filter predicate based on the selected segment
+    
+    switch ( sender.selectedSegmentIndex )
+    {
+        case FZKViewControllerFilterSelectionIndexFavorites:
+            // set a filter for favorites.
+            self.filterPredicate = [self favoriteFilterPredicate];
+            break;
+            
+        case FZKViewControllerFilterSelectionIndexRejects:
+            // set a filter for rejects.
+            self.filterPredicate = [self rejectFilterPredicate];
+            break;
+            
+        case FZKViewControllerFilterSelectionIndexAll:
+        default:
+            // make sure no filter is set
+            self.filterPredicate = nil;
+            break;
+    }
+    
+    // if the search bar is showing, hide it
+    if ( self.tableView.contentOffset.y < 44 )
+        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        
+    
+    // reload all sections
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfSectionsInTableView:self.tableView])]
+                  withRowAnimation:UITableViewRowAnimationAutomatic];
+    
 }
 
-- (void)saveTracks
+- (NSPredicate *)favoriteFilterPredicate
 {
-	// save!
-	// [NSKeyedArchiver archiveRootObject:self.tracks toFile:[[NSFileManager documentDirectoryPath] stringByAppendingPathComponent:@"tracks"]];
-	[NSKeyedArchiver archiveRootObject:self.favorites toFile:favoritesFile];
-	[NSKeyedArchiver archiveRootObject:self.rejects toFile:rejectsFile];
+    return [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings)
+            {
+                BOOL testStatus = NO; // default fail
+                
+                if ( [evaluatedObject respondsToSelector:@selector(favorite)] ) // check for a `favorite` accessor method
+                    testStatus = [evaluatedObject favorite]; // and test against it
+                
+                return testStatus;
+            }];
+}
+
+- (NSPredicate *)rejectFilterPredicate
+{
+    return [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings)
+            {
+                BOOL testStatus = NO; // default fail
+                
+                if ( [evaluatedObject respondsToSelector:@selector(reject)] ) // check for a `reject`  accessor method
+                    testStatus = [evaluatedObject reject]; // and test against it
+                
+                return testStatus;
+            }];
+}
+
+- (NSPredicate *)searchFilterPredicateForString:(NSString *)searchString
+{
+    return [NSPredicate predicateWithFormat:@"SELF.name contains[c] %@",searchString];
 }
 
 - (UIView *)star
@@ -105,23 +174,108 @@
 	return tmpLabel;
 }
 
+#pragma mark - Filtering
+#pragma mark - UISearchDisplayController Delegate Methods
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    [self setupFilterForString:searchString];
+
+    return YES;
+}
+
+-(void)setupFilterForString:(NSString*)filterString
+{
+    if ( filterString.length > 0 )
+    {
+        // see if we need to combine our search filter with a tab-based filter
+        switch ( self.filterControl.selectedSegmentIndex ) {
+            case FZKViewControllerFilterSelectionIndexFavorites:
+                // search the favorites
+                self.filterPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[[self favoriteFilterPredicate], [self searchFilterPredicateForString:filterString]]];
+                break;
+                
+            case FZKViewControllerFilterSelectionIndexRejects:
+                // search the rejects
+                self.filterPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[[self rejectFilterPredicate], [self searchFilterPredicateForString:filterString]]];
+                break;
+                
+            case FZKViewControllerFilterSelectionIndexAll:
+            default:
+                // just search by name
+                self.filterPredicate = [self searchFilterPredicateForString:filterString];
+                break;
+                
+        }
+    }
+    else
+    { 
+        // make sure we have clean cup and track data in the data source
+        self.dataSource = [FZKDataStore cups];
+        
+        // and a filter predicate based on the tab bar
+        [self filterSelectionChanged:self.filterControl];
+    }
+
+    // reload all sections
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfSectionsInTableView:self.tableView])]
+                  withRowAnimation:UITableViewRowAnimationAutomatic];
+
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    // make sure we have clean cup and track data in the data source
+    self.dataSource = [FZKDataStore cups];
+    
+    // and that the filter predicate is based on the tab bar
+    [self filterSelectionChanged:self.filterControl];
+
+    // and finally, reload all sections
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfSectionsInTableView:self.tableView])]
+                  withRowAnimation:UITableViewRowAnimationAutomatic];
+}
+
+#pragma mark - Scroll View
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    [searchBar resignFirstResponder];
+}
 
 #pragma mark - Table View
 
 - (int)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return [self.tracks count]; // number of cups
+	return [self.dataSource count]; // number of cups
 }
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return 4;
+    int rtnCount = 0;
+	
+    if ( [[self.dataSource objectAtIndex:section] isKindOfClass:[FZKCup class]] )
+    {
+        FZKCup *tmpCup = (FZKCup *)[self.dataSource objectAtIndex:section];
+
+        if ( self.filterPredicate )
+            rtnCount = [tmpCup.tracks filteredArrayUsingPredicate:self.filterPredicate].count;
+        else
+            rtnCount = tmpCup.tracks.count;
+    }
+    
+    return rtnCount;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-	NSDictionary *tmpCupDict = [self.tracks objectAtIndex:section];
-	return [[tmpCupDict allKeys] lastObject];
+    NSString *rtnString = nil;
+
+    if ( [[self.dataSource objectAtIndex:section] isKindOfClass:[FZKCup class]] )
+    {
+        FZKCup *tmpCup = (FZKCup *)[self.dataSource objectAtIndex:section];
+        rtnString = tmpCup.name;
+    }
+    
+    return rtnString;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -132,27 +286,45 @@
 	{
 		rtnCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"kartCell"];
 	}
-	
-	NSDictionary *tmpCupDict = [self.tracks objectAtIndex:indexPath.section];
-	NSArray *tmpTracks = [tmpCupDict objectForKey:[[tmpCupDict allKeys] lastObject]];
-	NSString *tmpTrack = [tmpTracks objectAtIndex:indexPath.row];
+    
+    // temporary pointer to the array we're using for this section
+	NSArray *tmpSectionArray = nil;
+    
+    if ( [[self.dataSource objectAtIndex:indexPath.section] isKindOfClass:[FZKCup class]] )
+    {
+        FZKCup *tmpCup = (FZKCup *)[self.dataSource objectAtIndex:indexPath.section];
+        
+        if ( self.filterPredicate )
+            tmpSectionArray = [tmpCup.tracks filteredArrayUsingPredicate:self.filterPredicate] ;
+        else
+            tmpSectionArray = tmpCup.tracks;
+        
+        
+        FZKTrack *tmpTrack = [tmpSectionArray objectAtIndex:indexPath.row];
+        
+        if ( [tmpTrack isKindOfClass:[FZKTrack class]] )
+        {
+            [rtnCell.textLabel setText:tmpTrack.name];
+            
+            if ( tmpTrack.favorite )
+            {
+                // add star
+                [rtnCell setAccessoryView:self.star];
+            }
+            else if ( tmpTrack.reject )
+            {
+                // add poo
+                [rtnCell setAccessoryView:self.poo];
+            }
+            else
+            {
+                [rtnCell setAccessoryView:nil];
+            }
+            
+        }
+        
+    }
 
-	[rtnCell.textLabel setText:tmpTrack];
-
-	if ( [self.favorites indexOfObject:tmpTrack] != NSNotFound )
-	{
-		// add star
-		[rtnCell setAccessoryView:self.star];
-	}
-	else if ( [self.rejects indexOfObject:tmpTrack] != NSNotFound )
-	{
-		// add poo
-		[rtnCell setAccessoryView:self.poo];
-	}
-	else
-	{
-		[rtnCell setAccessoryView:nil];
-	}
 	
 	return rtnCell;
 }
@@ -165,48 +337,49 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     CGFloat rtnHeight = 44.0f; // default
-     
-    if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexAll )
-        return rtnHeight;
-    
-    // filtering... ugly but works.
-    NSDictionary *tmpCupDict = [self.tracks objectAtIndex:indexPath.section];
-	NSArray *tmpTracks = [tmpCupDict objectForKey:[[tmpCupDict allKeys] lastObject]];
-	NSString *tmpTrack = [tmpTracks objectAtIndex:indexPath.row];
-
-    if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexFavorites && [self.favorites indexOfObject:tmpTrack] == NSNotFound )
-        rtnHeight = 0.0f;
-    else if ( self.filterControl.selectedSegmentIndex == FZKViewControllerFilterSelectionIndexRejects && [self.rejects indexOfObject:tmpTrack] == NSNotFound )
-        rtnHeight = 0.0f;
     
     return rtnHeight;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	// do stuff
-	NSDictionary *tmpCupDict = [self.tracks objectAtIndex:indexPath.section];
-	NSArray *tmpTracks = [tmpCupDict objectForKey:[[tmpCupDict allKeys] lastObject]];
-	NSString *tmpTrack = [tmpTracks objectAtIndex:indexPath.row];
+    if ( [[self.dataSource objectAtIndex:indexPath.section] isKindOfClass:[FZKCup class]] )
+    {
+        // temporary pointer to the array we're using for this section
+        NSArray *tmpSectionArray = nil;
 
-	if ( [self.favorites indexOfObject:tmpTrack] == NSNotFound && [self.rejects indexOfObject:tmpTrack] == NSNotFound )
-	{
-		[self.favorites addObject:tmpTrack];
-	}
-	else if ( [self.favorites indexOfObject:tmpTrack] != NSNotFound && [self.rejects indexOfObject:tmpTrack] == NSNotFound )
-	{
-		[self.favorites removeObject:tmpTrack];
-		[self.rejects addObject:tmpTrack];
-	}
-	else
-	{
-		[self.favorites removeObject:tmpTrack];
-		[self.rejects removeObject:tmpTrack];
-	}
-	
-	[tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-
-	[self saveTracks];
+        FZKCup *tmpCup = (FZKCup *)[self.dataSource objectAtIndex:indexPath.section];
+        
+        if ( self.filterPredicate )
+            tmpSectionArray = [tmpCup.tracks filteredArrayUsingPredicate:self.filterPredicate] ;
+        else
+            tmpSectionArray = tmpCup.tracks;
+        
+        
+        FZKTrack *tmpTrack = [tmpSectionArray objectAtIndex:indexPath.row];
+        
+        if ( [tmpTrack isKindOfClass:[FZKTrack class]] )
+        {
+            // edit the track!
+            if ( tmpTrack.favorite )
+            {
+                tmpTrack.favorite = NO;
+                tmpTrack.reject = YES;
+            }
+            else if ( tmpTrack.reject )
+            {
+                tmpTrack.reject = NO;
+                tmpTrack.favorite = NO;
+            }
+            else
+            {
+                tmpTrack.favorite = YES;
+                tmpTrack.reject = NO;
+            }
+        }
+    }
+    
+    [tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 @end

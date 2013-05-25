@@ -20,6 +20,9 @@
 		3C64A25F174AAC6300BE0B5E /* tracks.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3C64A25E174AAC6300BE0B5E /* tracks.txt */; };
 		3C64A276174C257F00BE0B5E /* NSFileManager+CommonDirectories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C64A275174C257F00BE0B5E /* NSFileManager+CommonDirectories.m */; };
 		3C64A278174C281300BE0B5E /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C64A277174C281300BE0B5E /* Icon@2x.png */; };
+		3C9267ED175029BF009F07E4 /* FZKCup.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9267EC175029BF009F07E4 /* FZKCup.m */; };
+		3C9267F0175029F3009F07E4 /* FZKDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9267EF175029F3009F07E4 /* FZKDataStore.m */; };
+		3C9267F317502D10009F07E4 /* FZKTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9267F217502D10009F07E4 /* FZKTrack.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +45,12 @@
 		3C64A274174C257F00BE0B5E /* NSFileManager+CommonDirectories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+CommonDirectories.h"; sourceTree = "<group>"; };
 		3C64A275174C257F00BE0B5E /* NSFileManager+CommonDirectories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+CommonDirectories.m"; sourceTree = "<group>"; };
 		3C64A277174C281300BE0B5E /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		3C9267EB175029BF009F07E4 /* FZKCup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FZKCup.h; sourceTree = "<group>"; };
+		3C9267EC175029BF009F07E4 /* FZKCup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FZKCup.m; sourceTree = "<group>"; };
+		3C9267EE175029F3009F07E4 /* FZKDataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FZKDataStore.h; sourceTree = "<group>"; };
+		3C9267EF175029F3009F07E4 /* FZKDataStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FZKDataStore.m; sourceTree = "<group>"; };
+		3C9267F117502D10009F07E4 /* FZKTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FZKTrack.h; sourceTree = "<group>"; };
+		3C9267F217502D10009F07E4 /* FZKTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FZKTrack.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +101,12 @@
 				3C64A24B174AAC5600BE0B5E /* FZKAppDelegate.m */,
 				3C64A253174AAC5600BE0B5E /* FZKViewController.h */,
 				3C64A254174AAC5600BE0B5E /* FZKViewController.m */,
+				3C9267EE175029F3009F07E4 /* FZKDataStore.h */,
+				3C9267EF175029F3009F07E4 /* FZKDataStore.m */,
+				3C9267EB175029BF009F07E4 /* FZKCup.h */,
+				3C9267EC175029BF009F07E4 /* FZKCup.m */,
+				3C9267F117502D10009F07E4 /* FZKTrack.h */,
+				3C9267F217502D10009F07E4 /* FZKTrack.m */,
 				3C64A274174C257F00BE0B5E /* NSFileManager+CommonDirectories.h */,
 				3C64A275174C257F00BE0B5E /* NSFileManager+CommonDirectories.m */,
 				3C64A242174AAC5600BE0B5E /* Supporting Files */,
@@ -187,6 +202,9 @@
 				3C64A24C174AAC5600BE0B5E /* FZKAppDelegate.m in Sources */,
 				3C64A255174AAC5600BE0B5E /* FZKViewController.m in Sources */,
 				3C64A276174C257F00BE0B5E /* NSFileManager+CommonDirectories.m in Sources */,
+				3C9267ED175029BF009F07E4 /* FZKCup.m in Sources */,
+				3C9267F0175029F3009F07E4 /* FZKDataStore.m in Sources */,
+				3C9267F317502D10009F07E4 /* FZKTrack.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

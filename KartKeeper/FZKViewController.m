@@ -16,7 +16,7 @@
     UISearchBar *searchBar;
     UISearchDisplayController *searchDisplayController;
     
-    CGPoint *_scrollUndoPosition;
+    CGPoint _scrollUndoPosition;
 }
 
 @property (nonatomic, strong) NSArray *tracks;
@@ -75,16 +75,6 @@
 	
     
 	return self;
-}
-
-- (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView
-{
-    // we don't want to scroll to the *top*, becuase that'll expose the serach bar.
-    // so we're going to go to the first row ourselves
-    [self.tableView setContentOffset:CGPointMake(0, 44) animated:YES];
-
-    // so we don't need to do the usual
-    return NO;
 }
 
 #pragma mark - Utilities
@@ -239,6 +229,24 @@
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
     [searchBar resignFirstResponder];
+}
+
+- (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView
+{
+    // we don't want to scroll to the *top*, becuase that'll expose the serach bar.
+    // so we're going to go to the first row ourselves
+    if ( self.tableView.contentOffset.y > 44 )
+    {
+        _scrollUndoPosition = self.tableView.contentOffset;
+        [self.tableView setContentOffset:CGPointMake(0, 44) animated:YES];
+    }
+    else if ( self.tableView.contentOffset.y == 44 )
+    {
+        [self.tableView setContentOffset:_scrollUndoPosition animated:YES];
+    }
+    
+    // so we don't need to do the usual
+    return NO;
 }
 
 #pragma mark - Table View
